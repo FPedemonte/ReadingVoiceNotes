@@ -9,8 +9,7 @@ from pydub import AudioSegment
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import openai
-from openai import OpenAI
-# from dotenv import load_dotenv  # Only needed for local development
+
 
 # Add debug information first
 st.write("Python version:", sys.version)
@@ -28,7 +27,7 @@ except Exception as e:
 
 # Initialize OpenAI client with error handling
 try:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
     st.write("OpenAI client initialized successfully")
 except Exception as e:
     st.error(f"Error initializing OpenAI client: {str(e)}")
@@ -107,7 +106,7 @@ def transcribe_audio(audio_file):
         
         # Use Whisper API for transcription
         try:
-            transcript = client.audio.transcriptions.create(
+            transcript = openai.audio.transcriptions.create(
                 model="whisper-1",
                 file=("audio.mp3", mp3_buffer, "audio/mp3")
             )

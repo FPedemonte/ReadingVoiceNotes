@@ -11,10 +11,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI
 # from dotenv import load_dotenv  # Only needed for local development
 
-# Initialize OpenAI client
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# Add debug information
+# Add debug information first
 st.write("Python version:", sys.version)
 try:
     ffmpeg_version = subprocess.check_output(['ffmpeg', '-version']).decode('utf-8').split('\n')[0]
@@ -27,6 +24,14 @@ try:
     st.write("pydub successfully imported")
 except Exception as e:
     st.write("pydub import error:", str(e))
+
+# Initialize OpenAI client with error handling
+try:
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    st.write("OpenAI client initialized successfully")
+except Exception as e:
+    st.error(f"Error initializing OpenAI client: {str(e)}")
+    raise e
 
 def setup_google_sheets():
     # Define the scope

@@ -8,6 +8,7 @@ import pytz
 from pydub import AudioSegment
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import openai
 from openai import OpenAI
 # from dotenv import load_dotenv  # Only needed for local development
 

@@ -1,4 +1,21 @@
 import streamlit as st
+import sys
+import subprocess
+
+# Add debug information
+st.write("Python version:", sys.version)
+try:
+    ffmpeg_version = subprocess.check_output(['ffmpeg', '-version']).decode('utf-8').split('\n')[0]
+    st.write("FFmpeg version:", ffmpeg_version)
+except Exception as e:
+    st.write("FFmpeg check error:", str(e))
+
+try:
+    from pydub import AudioSegment
+    st.write("pydub successfully imported")
+except Exception as e:
+    st.write("pydub import error:", str(e))
+
 import openai
 from tempfile import NamedTemporaryFile
 import gspread
@@ -8,7 +25,6 @@ from dotenv import load_dotenv
 import os
 from openai import OpenAI
 import pytz
-from pydub import AudioSegment
 import io
 # Load environment variables
 # load_dotenv()

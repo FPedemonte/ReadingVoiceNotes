@@ -11,6 +11,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI
 # from dotenv import load_dotenv  # Only needed for local development
 
+# Initialize OpenAI client
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 # Add debug information
 st.write("Python version:", sys.version)
 try:

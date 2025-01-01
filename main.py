@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import os
 from openai import OpenAI
 import pytz
+from pydub import AudioSegment
+import io
 # Load environment variables
 # load_dotenv()
 
@@ -45,7 +47,7 @@ def write_to_spreadsheet(data):
         client = setup_google_sheets()
         
         # Use spreadsheet ID instead of name
-        spreadsheet = client.open_by_key('1q1z7cl5vgIVNjGWGSH340HnnyCi_8Ut04aDw6niT8Ks')
+        spreadsheet = client.open_by_key('1vtFjNlNBLcrZwQXfbseHel1Won6_fynJq4ey7WEgPYM')
         
         # Select the first worksheet
         worksheet = spreadsheet.get_worksheet(0)
@@ -58,24 +60,45 @@ def write_to_spreadsheet(data):
         return False
 
 def transcribe_audio(audio_file):
-    # Save audio bytes to a temporary file
-    with open('temp_audio.wav', 'wb') as f:
-        # Get bytes from UploadedFile
-        f.write(audio_file.getvalue())
-
     try:
+        # Convert the audio bytes to WAV first
+        audio_bytes = audio_file.getvalue()
+        audio = AudioSegment.from_wav(io.BytesIO(audio_bytes))
+        
+        # Add error handling for empty audio
+        if len(audio) == 0:
+            st.error("The audio file appears to be empty")
+            return None
+            
+        # Convert to MP3 with 128kbps
+        mp3_buffer = io.BytesIO()
+        try:
+            audio.export(mp3_buffer, format='mp3', bitrate='128k')
+        except Exception as e:
+            st.error(f"Error converting audio to MP3: {str(e)}")
+            return None
+            
+        mp3_buffer.seek(0)
+        
+        # Check file size before sending to API (Whisper has a 25MB limit)
+        file_size = mp3_buffer.getbuffer().nbytes
+        if file_size > 25 * 1024 * 1024:  # 25MB in bytes
+            st.error("Audio file is too large (max 25MB)")
+            return None
+        
         # Use Whisper API for transcription
-        with open('temp_audio.wav', "rb") as f:
+        try:
             transcript = client.audio.transcriptions.create(
                 model="whisper-1",
-                file=f
+                file=("audio.mp3", mp3_buffer, "audio/mp3")
             )
-        os.remove('temp_audio.wav')  # Clean up the temporary file
-        return transcript.text
+            return transcript.text
+        except Exception as e:
+            st.error(f"Whisper API error: {str(e)}")
+            return None
+            
     except Exception as e:
         st.error(f"Error during transcription: {str(e)}")
-        if os.path.exists('temp_audio.wav'):
-            os.remove('temp_audio.wav')  # Clean up in case of error
         return None
 
 def main():

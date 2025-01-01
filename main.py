@@ -1,6 +1,15 @@
 import streamlit as st
 import sys
 import subprocess
+import io
+import os
+from datetime import datetime
+import pytz
+from pydub import AudioSegment
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from openai import OpenAI
+# from dotenv import load_dotenv  # Only needed for local development
 
 # Add debug information
 st.write("Python version:", sys.version)
@@ -15,21 +24,6 @@ try:
     st.write("pydub successfully imported")
 except Exception as e:
     st.write("pydub import error:", str(e))
-
-import openai
-from tempfile import NamedTemporaryFile
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
-from dotenv import load_dotenv
-import os
-from openai import OpenAI
-import pytz
-import io
-# Load environment variables
-# load_dotenv()
-
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def setup_google_sheets():
     # Define the scope
